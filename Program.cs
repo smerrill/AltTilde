@@ -1,11 +1,9 @@
 using System;
 using System.Windows.Forms;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Microsoft.Windows.Sdk;
 
-namespace AltTilde2
+namespace AltTilde
 {
     static class Program
     {
@@ -27,11 +25,12 @@ namespace AltTilde2
                 }
                 else
                 {
-                    switchWindows((int)m.WParam == 1);
+                    SwitchWindows((int)m.WParam == 1);
+                    // @TODO: Should I still `base.WndProc(ref m)` here?
                 }
             }
 
-            private void switchWindows(bool forward)
+            private void SwitchWindows(bool forward)
             {
                 List<HWND> topLevelWindows = new List<HWND>();
                 HWND foregroundHandle = PInvoke.GetForegroundWindow();
@@ -48,21 +47,8 @@ namespace AltTilde2
                         if (PInvoke.IsWindowVisible(hwnd)) {
                             if (PInvoke.GetParent(hwnd).Value == 0)
                             {
+                                // @TODO: Is more filtering needed here?
                                 topLevelWindows.Add(hwnd);
-
-                                //var hasOwner = (PInvoke.GetWindow(hwnd, GetWindow_uCmdFlags.GW_OWNER).Value != 0);
-                                //if (!hasOwner)
-                                //{
-                                //    topLevelWindows.Add(hwnd);
-                                //}
-                                /*
-                                var extendedStyles = PInvoke.GetWindowLong(hwnd, GetWindowLongPtr_nIndex.GWL_EXSTYLE);
-
-                                // WS_EX_APPWINDOW
-                                if ((extendedStyles & 0x00040000L) == 0x00040000L) {
-                                    topLevelWindows.Add(hwnd);
-                                }
-                                */
                             }
                         }
                         return true;
@@ -109,28 +95,13 @@ namespace AltTilde2
 
                         if (newWindowIndex != -1)
                         {
-                            activateWindow(topLevelWindows[newWindowIndex]);
+                            ActivateWindow(topLevelWindows[newWindowIndex]);
                         }
                     }
-
-                    //uint processId = 0, threadId;
-
-                    //unsafe
-                    //{
-                    //    uint* pid = (uint*)0;
-                    //    threadId = PInvoke.GetWindowThreadProcessId(handle, null);
-                    //    if (pid != null)
-                    //    {
-                    //        processId = (uint)pid;
-                    //    }
-                    //}
-
-                    //Console.WriteLine(threadId);
-                    //Console.WriteLine(processId);
                 }
             }
 
-            private void activateWindow(HWND handle)
+            private void ActivateWindow(HWND handle)
             {
                 PInvoke.SetForegroundWindow(handle);
                 // @TODO: Do I need to AttachThreadInput?
@@ -165,82 +136,14 @@ namespace AltTilde2
                 var exitItem = new ToolStripMenuItem("Exit", null, Exit);
                 trayIcon.ContextMenuStrip.Items.Add(exitItem);
 
-                initHandlers();
+                InitHandlers();
             }
 
-            private void initHandlers()
+            private void InitHandlers()
             {
                 // @TODO: Check for FALSE responses.
                 PInvoke.RegisterHotKey((HWND)messageForm.Handle, 1, RegisterHotKey_fsModifiersFlags.MOD_ALT | RegisterHotKey_fsModifiersFlags.MOD_NOREPEAT, VK_OEM_3);
                 PInvoke.RegisterHotKey((HWND)messageForm.Handle, 2, RegisterHotKey_fsModifiersFlags.MOD_ALT | RegisterHotKey_fsModifiersFlags.MOD_NOREPEAT | RegisterHotKey_fsModifiersFlags.MOD_SHIFT, VK_OEM_3);
-            }
-
-            string GetForegroundApp()
-            {
-                HWND handle = PInvoke.GetForegroundWindow();
-                if (handle.Value > 0)
-                {
-                    uint threadId = 0;
-                    unsafe
-                    {
-                        threadId = PInvoke.GetWindowThreadProcessId(handle);
-                    }
-
-                    PInvoke.EnumThreadWindows(threadId, (HWND hwnd, LPARAM customParam) =>
-                    {
-
-                        return true;
-                    }, (LPARAM)0);
-                    Console.WriteLine(threadId);
-
-                    //uint processId = 0, threadId;
-
-                    //unsafe
-                    //{
-                    //    uint* pid = (uint*)0;
-                    //    threadId = PInvoke.GetWindowThreadProcessId(handle, null);
-                    //    if (pid != null)
-                    //    {
-                    //        processId = (uint)pid;
-                    //    }
-                    //}
-
-                    //Console.WriteLine(threadId);
-                    //Console.WriteLine(processId);
-                }
-
-                return "Unknown";
-            }
-
-            static void GetAllWindowsInfo()
-            {
-                bool windowReturn = PInvoke.EnumWindows(
-                    (HWND handle, LPARAM customParam) =>
-                    {
-                        int bufferSize = PInvoke.GetWindowTextLength(handle) + 1;
-                        unsafe
-                        {
-                            fixed (char* windowNameChars = new char[bufferSize])
-                            {
-                                if (PInvoke.GetWindowText(handle, windowNameChars, bufferSize) == 0)
-                                {
-                                    int errorCode = Marshal.GetLastWin32Error();
-                                    if (errorCode != 0)
-                                    {
-                                        throw new Win32Exception(errorCode);
-                                    }
-
-                                    return true;
-                                }
-
-                                string windowName = new string(windowNameChars);
-                                Console.WriteLine(windowName);
-                            }
-
-                            return true;
-                        }
-                    },
-                    (LPARAM)0);
             }
 
             void Exit(object sender, EventArgs e)

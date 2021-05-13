@@ -1,5 +1,6 @@
 GetWindowTextLength
 RegisterHotKey
+UnregisterHotKey
 AttachThreadInput
 EnumWindows
 EnumThreadWindows
@@ -14,13 +15,4 @@ IsWindowVisible
 SendMessage
 SetForegroundWindow
 ShowWindow
-SW_SHOW
-SW_RESTORE
-GW_OWNER
-GWL_HWNDPARENT
-GWL_EXSTYLE
-WS_EX_TOOLWINDOW
-WS_EX_APPWINDOW
-LB_ADDSTRING
-LB_SETITEMDATA
-WM_GETTEXT
+

@@ -2,9 +2,13 @@
 
 ## Overview
 
+AltTilde is a tray application that listens for the Alt-` and Alt-Shift-` hotkeys to cycle forwards and backwards through open windows of the foreground application.
+
+## Why?
+
 Modern Windows development is easier than ever for me, a former Mac-head, especially with WSL2 and its ability to run both Windows and Linux commands.
 
-The one keyboard shortcut I truly miss on Windows machines is Command/Alt-`, which cycles through windows in the foreground application. Both OS X and GNOME support this.
+The one keyboard shortcut I truly miss on Windows machines is Command/Alt-`, which cycles through windows in the foreground application. Both OS X and GNOME support this, so I wrote this app to bring the same support to Windows.
 
 ## Technologies and Acknowledgements
 

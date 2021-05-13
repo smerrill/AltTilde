@@ -134,6 +134,14 @@ namespace AltTilde2
             {
                 PInvoke.SetForegroundWindow(handle);
                 // @TODO: Do I need to AttachThreadInput?
+                if (PInvoke.IsIconic(handle))
+                {
+                    PInvoke.ShowWindow(handle, SHOW_WINDOW_CMD.SW_RESTORE);
+                }
+                else
+                {
+                    PInvoke.ShowWindow(handle, SHOW_WINDOW_CMD.SW_SHOW);
+                }
             }
         }
 

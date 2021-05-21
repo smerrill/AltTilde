@@ -1,18 +1,12 @@
-GetWindowTextLength
 RegisterHotKey
 UnregisterHotKey
-AttachThreadInput
-EnumWindows
 EnumThreadWindows
+EnumWindows
 GetForegroundWindow
 GetParent
-GetWindow
-GetWindowLong
-GetWindowText
 GetWindowThreadProcessId
 IsIconic
 IsWindowVisible
-SendMessage
 SetForegroundWindow
 ShowWindow
 

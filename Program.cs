@@ -37,9 +37,13 @@ namespace AltTilde
                 if (foregroundHandle.Value > 0)
                 {
                     uint threadId = 0;
+                    uint processId;
                     unsafe
                     {
-                        threadId = PInvoke.GetWindowThreadProcessId(foregroundHandle);
+                        uint tmpProcessId = 0;
+                        uint* processIdPtr = (uint*)&tmpProcessId;
+                        threadId = PInvoke.GetWindowThreadProcessId(foregroundHandle, processIdPtr);
+                        processId = tmpProcessId;
                     }
 
                     PInvoke.EnumThreadWindows(threadId, (HWND hwnd, LPARAM customParam) =>
@@ -53,6 +57,33 @@ namespace AltTilde
                         }
                         return true;
                     }, (LPARAM)0);
+
+                    if (topLevelWindows.Count == 1)
+                    {
+                        // Try another way; look for all windows with common process IDs
+                        PInvoke.EnumWindows((HWND hwnd, LPARAM customParam) =>
+                        {
+                            if (PInvoke.IsWindowVisible(hwnd)) {
+                                if (PInvoke.GetParent(hwnd).Value == 0)
+                                {
+                                    uint windowThreadId = 0;
+                                    uint windowProcessId = 0;
+                                    unsafe
+                                    {
+                                        uint* windowProcessIdPtr = (uint*)&windowProcessId;
+                                        windowThreadId = PInvoke.GetWindowThreadProcessId(hwnd, windowProcessIdPtr);
+                                    }
+                                    if (windowThreadId != threadId && windowProcessId == processId)
+                                    {
+                                        // @TODO: Is more filtering needed here?
+                                        topLevelWindows.Add(hwnd);
+                                    }
+                                }
+                            }
+                            return true;
+                        }, (LPARAM)0);
+
+                    }
 
                     if (topLevelWindows.Count > 1)
                     {
